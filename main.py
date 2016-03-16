@@ -7,7 +7,7 @@ from pprint import pprint
 from copy import deepcopy
 
 def drawCircle(
-        circlePoints=10,
+        circlePoints=4,
         imageSize=(500,500),
         circleRadius=200,
         circleColour=(0,255,0),
@@ -26,41 +26,41 @@ def drawCircle(
     relativeColour = (circleColour[0]-backgroundColour[0],
                       circleColour[1]-backgroundColour[1],
                       circleColour[2]-backgroundColour[2])
-
+    ## points around the circle
     points = tuple((cos(a)*circleRadius,sin(a)*circleRadius) for a in arange(0,2*pi,2*pi/circlePoints))
-    pprint(points)
 
-    ## make line functions
-    # all functions return a number between 0 and 1
-    # (or at least they are supposed to)
+    ## Some tools for making functions
     functions = []
-    def deltafy(coord,delta):
+    def getDelta(coord,delta):
         x,y = coord
         return(x-delta[0],y-delta[1])
-    def circleFunction(coord):
-        x,y = deltafy(coord,center)
-        distFromCenter = sqrt((x)**2+(y)**2)
-        zeroAtRadius = distFromCenter-circleRadius
-        return zeroAtRadius
-        #return 1/(1+zeroAtRadius**2)
-    functions+=[
-            circleFunction,
-            lambda c:circleFunction(c)+10,
-            ]
-    def makecircle(p):
-        return lambda c: circleFunction(deltafy(c,p))+160
-    for p in points:
-        functions+=[makecircle(p)]
+    def makecircle(p,r):
+        def circle(coord):
+            x,y = getDelta(getDelta(coord,p),center)
+            distFromCenter = sqrt((x)**2+(y)**2)
+            zeroAtRadius = distFromCenter-r
+            return zeroAtRadius
+        return circle
     def makeline(p1,p2):
         def line(coord):
-            x,y = deltafy(coord,p1)
-            xd,yd = p1[0]*p2[0],p1[1]*p2[1]#deltafy(p1,p2)
+            x,y = getDelta(getDelta(coord,p1),center)
+            xd,yd = p2[0]-p1[0],p1[1]-p2[1]#getDelta(p1,p2)
             dd = fabs(xd)+fabs(yd)
             xd,yd = xd/dd, yd/dd
             return(x*yd+y*xd)
         return line
+    ## actually define some functions to be drawn
+    # these are 3d functions, they take x,y coordinates and return z
+    # where z is close to 0 a line will be drawn
+    functions+=[
+            makecircle((0,0),circleRadius)
+            ]
     for p in points:
-        functions+=[makeline(center,p)]
+        functions+=[makecircle(p,30)]
+    for i in range(len(points)):
+        for j in range(i+1,len(points)):
+            functions+=[makeline(points[i],points[j])]
+    # this function evaluates a coordinate against all the functions
     def runFunctions(coord):
         current = 0
         for function in functions:

@@ -1,4 +1,4 @@
 
 
-Playing around with primes in different bases.
+This is a really silly mathy way to draw magicy looking circles.
 
