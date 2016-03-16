@@ -7,9 +7,9 @@ from pprint import pprint
 from copy import deepcopy
 
 def drawCircle(
-        circlePoints=4,
-        imageSize=(500,500),
-        circleRadius=200,
+        circlePoints=10,
+        imageSize=(400,400),
+        circleRadius=150,
         circleColour=(0,255,0),
         backgroundColour=(255,255,255),
         title=None,
