@@ -11,7 +11,8 @@ def drawCircle(
         imageSize=(400,400),
         circleRadius=150,
         circleColour=(0,255,0),
-        backgroundColour=(255,255,255),
+        #backgroundColour=(255,255,255),
+        backgroundColour=(0,0,0),
         title=None,
         ):
    ### initialize image!
@@ -42,12 +43,13 @@ def drawCircle(
             return zeroAtRadius
         return circle
     def makeline(p1,p2):
-        def line(coord):
+        def line(coord,widthFactor=3):
+            ## bigger widthFactor is thinner line
             x,y = getDelta(getDelta(coord,p1),center)
             xd,yd = p2[0]-p1[0],p1[1]-p2[1]#getDelta(p1,p2)
             dd = fabs(xd)+fabs(yd)
             xd,yd = xd/dd, yd/dd
-            return(x*yd+y*xd)
+            return(x*yd*widthFactor+y*xd*widthFactor)
         return line
     ## actually define some functions to be drawn
     # these are 3d functions, they take x,y coordinates and return z
@@ -79,7 +81,22 @@ def drawCircle(
                 int(backgroundColour[2]+(relativeColour[2]*intensity))
                 )
         pixels[coord] = thisPixColour
-    map(renderPixel,coords)
+
+
+        ####### do the rendering!!!
+
+    #from multiprocessing import Pool
+    from multiprocessing.pool import ThreadPool
+    import tqdm
+
+    pool = ThreadPool(processes=64)
+    for _ in tqdm.tqdm(pool.imap_unordered(renderPixel, coords), total=len(coords)):
+            pass
+
+    #for coord in coords:
+    #    renderPixel(coord)
+
+    #map(renderPixel,coords)
 
     ## save image
     if not title:
@@ -87,5 +104,11 @@ def drawCircle(
     image.save(title)
 
 if __name__=="__main__":
-    drawCircle()
+    for i in range(25,51):
+        print(f"Rendering circle with {i} points!")
+        drawCircle(
+                circlePoints=i,
+                imageSize=(800,800),
+                circleRadius=200,
+                )
 
